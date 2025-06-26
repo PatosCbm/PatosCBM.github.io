@@ -1,73 +1,95 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Escáner QR Móvil</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            background-color: #f9f9f9;
-            height: 100vh;
-            padding: 1rem;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Escáner QR Móvil</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-        #qr-reader {
-            width: 100%;
-            max-width: 400px;
-            height: auto;
-            aspect-ratio: 1 / 1;
-            margin-top: 1rem;
-        }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f9f9f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 60px; /* espacio para el banner */
+    }
 
-        #qr-reader-results {
-            margin-top: 1rem;
-            font-size: 1.1rem;
-            color: #333;
-            text-align: center;
-            word-break: break-word;
-        }
-    </style>
+    #banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 50px;
+      background: rgba(33, 33, 33, 0.95);
+      color: #ffffff;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      z-index: 999;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      letter-spacing: 1px;
+    }
+
+    #qr-reader {
+      width: 100%;
+      max-width: 400px;
+      aspect-ratio: 1 / 1;
+      margin-top: 1rem;
+    }
+
+    #qr-reader-results {
+      margin-top: 1rem;
+      font-size: 1.1rem;
+      color: #333;
+      text-align: center;
+      word-break: break-word;
+      max-width: 90%;
+    }
+  </style>
 </head>
 <body>
-    <h2>Escanea tu código QR</h2>
-    <div id="qr-reader"></div>
-    <div id="qr-reader-results">Esperando escaneo...</div>
+  <div id="banner">QUINTA TICKET</div>
 
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/minified/html5-qrcode.min.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const resultContainer = document.getElementById('qr-reader-results');
-            let lastResult = null;
+  <h2 style="margin: 0.5rem 0;">Escanea tu código QR</h2>
+  <div id="qr-reader"></div>
+  <div id="qr-reader-results">Esperando escaneo...</div>
 
-            function onScanSuccess(decodedText, decodedResult) {
-                if (decodedText !== lastResult) {
-                    lastResult = decodedText;
-                    resultContainer.innerText = `Resultado: ${decodedText}`;
-                    console.log("QR detectado:", decodedText, decodedResult);
-                }
-            }
+  <script src="/html5.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const resultContainer = document.getElementById('qr-reader-results');
+      let lastResult = null;
 
-            const html5QrCode = new Html5Qrcode("qr-reader");
-            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+      function onScanSuccess(decodedText, decodedResult) {
+        if (decodedText !== lastResult) {
+          lastResult = decodedText;
+          resultContainer.innerText = `Resultado: ${decodedText}`;
+          console.log("QR detectado:", decodedText, decodedResult);
+        }
+      }
 
-            html5QrCode.start(
-                { facingMode: { exact: "environment" } }, // Cámara trasera
-                config,
-                onScanSuccess,
-                (errorMessage) => {
-                    console.warn("No se detectó QR:", errorMessage);
-                }
-            ).catch(err => {
-                resultContainer.innerText = "No se pudo acceder a la cámara. Revisa permisos.";
-                console.error("Error al iniciar cámara:", err);
-            });
-        });
-    </script>
+      const html5QrCode = new Html5Qrcode("qr-reader");
+      const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+      html5QrCode.start(
+        { facingMode: { exact: "environment" } },
+        config,
+        onScanSuccess,
+        (errorMessage) => {
+          console.warn("No se detectó QR:", errorMessage);
+        }
+      ).catch(err => {
+        resultContainer.innerText = "No se pudo acceder a la cámara. Revisa permisos.";
+        console.error("Error al iniciar cámara:", err);
+      });
+    });
+  </script>
 </body>
 </html>
