@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Quinta Ticket</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: black;
+      overflow: hidden;
+    }
+
+    #banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 50px;
+      background: rgba(33, 33, 33, 0.95);
+      color: #ffffff;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      z-index: 999;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      letter-spacing: 1px;
+      gap: 10px;
+    }
+
+    #banner img {
+      height: 32px; /* tamaño del logo */
+      width: auto;
+      display: inline-block;
+    }
+
+    #qr-reader {
+      position: absolute;
+      top: 50px;
+      left: 0;
+      width: 100%;
+      height: calc(100% - 50px);
+    }
+
+    /* Modal */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      max-width: 300px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-content p {
+      margin-bottom: 1.5rem;
+      font-size: 1.2rem;
+    }
+
+    .modal-content button {
+      padding: 0.5rem 1.5rem;
+      background-color: #00c853;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .modal-content button:hover {
+      background-color: #00b34d;
+    }
+
+    /* Zoom control */
+    #zoom-control {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 10px;
+      border-radius: 8px;
+      z-index: 1001;
+      user-select: none;
+    }
+
+    #zoom-control label {
+      font-weight: bold;
+      margin-right: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div id="banner">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAvklEQVRYR+2XwQ2AIAhF/z+ptqmwIGh9YaAwZY0qaEYcQcQG6u6fY3t2a6SkYY4BQAoC7BS7kATvsuwGwQkEsPCvC4XAGfARLOJCaHAdYLZCQxhqZlAvhL8bLNYAOziAGsGdhcI3CYIjGZBiCJ4mQiV6SpIg1/QQNs0w6dUjHfA2Ds0SxBY/iDwlxEhffY7LAAvQGPNrz1DlZ2Shxpmk3UM2vH2QZ8C8MYoLhNkzKAAAAABJRU5ErkJggg==" alt="Quinta Logo" />
+    QUINTA TICKET
+  </div>
+
+  <!-- Zoom slider -->
+  <div id="zoom-control" style="display:none;">
+    <label for="zoom-range">Zoom:</label>
+    <input type="range" id="zoom-range" min="1" max="3" step="0.1" value="1" />
+  </div>
+
+  <div id="qr-reader"></div>
+
+  <!-- Modal -->
+  <div id="result-modal" class="modal">
+    <div class="modal-content">
+      <p id="modal-message">Resultado</p>
+      <button id="modal-close-btn">Aceptar</button>
+    </div>
+  </div>
+
+  <script src="/html5.js"></script>
+  <script>
+    let html5QrCode;
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const modal = document.getElementById('result-modal');
+      const modalMessage = document.getElementById('modal-message');
+      const modalCloseBtn = document.getElementById('modal-close-btn');
+      const zoomControl = document.getElementById('zoom-control');
+      const zoomRange = document.getElementById('zoom-range');
+
+      let lastResult = null;
+      let scannerRunning = false;
+      let videoTrack = null;
+
+      function showModal(message) {
+        modalMessage.textContent = message;
+        modal.style.display = 'flex';
+      }
+
+      function hideModal() {
+        modal.style.display = 'none';
+      }
+
+      function onScanSuccess(decodedText, decodedResult) {
+        if (decodedText !== lastResult) {
+          lastResult = decodedText;
+
+          if (scannerRunning) {
+            html5QrCode.pause(true);
+            scannerRunning = false;
+          }
+
+          if (decodedText === "A") {
+            showModal("Código A detectado 🎉");
+          } else if (decodedText === "B") {
+            showModal("Código B detectado ✅");
+          } else {
+            showModal(`Código: ${decodedText}`);
+          }
+        }
+      }
+
+      function setZoom(zoomLevel) {
+        if (!videoTrack) return;
+        const capabilities = videoTrack.getCapabilities();
+        if (!capabilities.zoom) {
+          console.log("Zoom no soportado en esta cámara.");
+          return;
+        }
+        const constraints = {
+          advanced: [{ zoom: zoomLevel }]
+        };
+        videoTrack.applyConstraints(constraints).catch(e => {
+          console.warn("No se pudo aplicar zoom:", e);
+        });
+      }
+
+      modalCloseBtn.addEventListener('click', () => {
+        hideModal();
+        lastResult = null;
+        html5QrCode.resume();
+        scannerRunning = true;
+      });
+
+      zoomRange.addEventListener("input", (e) => {
+        const zoomValue = parseFloat(e.target.value);
+        setZoom(zoomValue);
+      });
+
+      html5QrCode = new Html5Qrcode("qr-reader");
+      const config = {
+        fps: 10,
+        qrbox: function(viewfinderWidth, viewfinderHeight) {
+          const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+          const boxSize = Math.floor(minEdge * 0.5);
+          return { width: boxSize * 1.4, height: boxSize };
+        }
+      };
+
+      html5QrCode.start(
+        { facingMode: "environment" },
+        config,
+        onScanSuccess,
+        (errorMessage) => {
+          console.warn("No se detectó QR:", errorMessage);
+        }
+      ).then(() => {
+        scannerRunning = true;
+        console.log("Escáner iniciado correctamente.");
+
+        // Obtener el track de video para zoom
+        const track = html5QrCode.getRunningTrack();
+        if (track) {
+          videoTrack = track;
+          const capabilities = videoTrack.getCapabilities();
+          if (capabilities.zoom) {
+            zoomControl.style.display = 'block';
+            zoomRange.min = capabilities.zoom.min || 1;
+            zoomRange.max = capabilities.zoom.max || 3;
+            zoomRange.step = capabilities.zoom.step || 0.1;
+            zoomRange.value = capabilities.zoom.min || 1;
+          } else {
+            zoomControl.style.display = 'none';
+          }
+        }
+      }).catch(err => {
+        console.error("Error al iniciar cámara:", err);
+      });
+    });
+  </script>
+</body>
+</html>
