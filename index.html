@@ -1,45 +1,73 @@
-<html>
+<!DOCTYPE html>
+<html lang="es">
 <head>
-    <title>Html-Qrcode Demo</title>
-<body>
-    <div id="qr-reader" style="width:500px"></div>
-    <div id="qr-reader-results"></div>
-</body>
-<script src="/html5.js"></script>
-<script>
-    function docReady(fn) {
-        if (document.readyState === "complete" || document.readyState === "interactive") {
-            setTimeout(fn, 1);
-        } else {
-            document.addEventListener("DOMContentLoaded", fn);
-        }
-    }
-
-    docReady(function () {
-        var resultContainer = document.getElementById('qr-reader-results');
-        var lastResult, countResults = 0;
-
-        function onScanSuccess(decodedText, decodedResult) {
-            if (decodedText !== lastResult) {
-                ++countResults;
-                lastResult = decodedText;
-                resultContainer.innerText = `Scan result: ${decodedText}`;
-                console.log(`Scan result ${decodedText}`, decodedResult);
-            }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escáner QR Móvil</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            background-color: #f9f9f9;
+            height: 100vh;
+            padding: 1rem;
         }
 
-        const html5QrCode = new Html5Qrcode("qr-reader");
-        const config = { fps: 10, qrbox: 250 };
+        #qr-reader {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            aspect-ratio: 1 / 1;
+            margin-top: 1rem;
+        }
 
-        html5QrCode.start(
-            { facingMode: { exact: "environment" } }, // Forzar cámara trasera
-            config,
-            onScanSuccess,
-            (errorMessage) => {
-                console.warn("QR error", errorMessage);
-            }
-        );
-    });
-</script>
+        #qr-reader-results {
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            color: #333;
+            text-align: center;
+            word-break: break-word;
+        }
+    </style>
 </head>
+<body>
+    <h2>Escanea tu código QR</h2>
+    <div id="qr-reader"></div>
+    <div id="qr-reader-results">Esperando escaneo...</div>
+
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/minified/html5-qrcode.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const resultContainer = document.getElementById('qr-reader-results');
+            let lastResult = null;
+
+            function onScanSuccess(decodedText, decodedResult) {
+                if (decodedText !== lastResult) {
+                    lastResult = decodedText;
+                    resultContainer.innerText = `Resultado: ${decodedText}`;
+                    console.log("QR detectado:", decodedText, decodedResult);
+                }
+            }
+
+            const html5QrCode = new Html5Qrcode("qr-reader");
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+            html5QrCode.start(
+                { facingMode: { exact: "environment" } }, // Cámara trasera
+                config,
+                onScanSuccess,
+                (errorMessage) => {
+                    console.warn("No se detectó QR:", errorMessage);
+                }
+            ).catch(err => {
+                resultContainer.innerText = "No se pudo acceder a la cámara. Revisa permisos.";
+                console.error("Error al iniciar cámara:", err);
+            });
+        });
+    </script>
+</body>
 </html>
