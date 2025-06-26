@@ -36,13 +36,16 @@
       letter-spacing: 1px;
     }
 
-    #qr-reader {
-      position: absolute;
-      top: 50px;
-      left: 0;
-      width: 100%;
-      height: calc(100% - 50px);
-    }
+#qr-reader {
+  position: absolute;
+  top: 50px;
+  left: 0;
+  width: 100vw;
+  aspect-ratio: 1 / 1;
+  max-width: 100vw;
+  max-height: calc(100vh - 50px);
+  overflow: hidden;
+}
 
     /* Modal */
     .modal {
@@ -88,7 +91,7 @@
   </style>
 </head>
 <body>
-  <div id="banner">QUINTA TICKET99</div>
+  <div id="banner">QUINTA TICKET</div>
   <div id="qr-reader"></div>
 
   <!-- Modal -->
