@@ -41,24 +41,9 @@
       width: 100%;
       max-width: 400px;
       aspect-ratio: 1 / 1;
-      position: relative;
       margin-top: 1rem;
       border-radius: 10px;
       overflow: hidden;
-    }
-
-    #qr-frame {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 250px;
-      height: 250px;
-      transform: translate(-50%, -50%);
-      border: 2px solid #00c853;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0, 200, 83, 0.4);
-      pointer-events: none;
-      z-index: 10;
     }
 
     #qr-reader-results {
@@ -70,7 +55,6 @@
       max-width: 90%;
     }
 
-    /* Modal */
     .modal {
       position: fixed;
       top: 0;
@@ -114,7 +98,7 @@
   </style>
 </head>
 <body>
-  <div id="banner">QUINTA TICKET6</div>
+  <div id="banner">QUINTA TICKET</div>
 
   <div id="qr-reader"></div>
   <div id="qr-reader-results">Esperando escaneo...</div>
@@ -127,7 +111,7 @@
     </div>
   </div>
 
-  <script src="html5.js"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/minified/html5-qrcode.min.js"></script>
   <script>
     let html5QrCode;
 
@@ -138,6 +122,7 @@
       const modalCloseBtn = document.getElementById('modal-close-btn');
 
       let lastResult = null;
+      let scannerRunning = false;
 
       function showModal(message) {
         modalMessage.textContent = message;
@@ -152,9 +137,12 @@
         if (decodedText !== lastResult) {
           lastResult = decodedText;
           resultContainer.innerText = `Resultado: ${decodedText}`;
-          console.log("QR detectado:", decodedText, decodedResult);
+          console.log("QR detectado:", decodedText);
 
-          html5QrCode.pause();
+          if (scannerRunning) {
+            html5QrCode.pause(true); // pause video feed too
+            scannerRunning = false;
+          }
 
           if (decodedText === "A") {
             showModal("Código A detectado 🎉");
@@ -168,26 +156,24 @@
 
       modalCloseBtn.addEventListener('click', () => {
         hideModal();
-        html5QrCode.resume();
         lastResult = null;
+        html5QrCode.resume();
+        scannerRunning = true;
       });
 
       html5QrCode = new Html5Qrcode("qr-reader");
       const config = { fps: 10, qrbox: 250 };
 
       html5QrCode.start(
-        { facingMode: { exact: "environment" } },
+        { facingMode: "environment" },
         config,
         onScanSuccess,
         (errorMessage) => {
-          console.warn("No se detectó QR:", errorMessage);
+          // Silenciar errores típicos de no detección
         }
       ).then(() => {
-        // Añadir marco visual después que el QR se haya iniciado
-        const videoContainer = document.querySelector("#qr-reader");
-        const frame = document.createElement("div");
-        frame.id = "qr-frame";
-        videoContainer.appendChild(frame);
+        scannerRunning = true;
+        console.log("Escáner iniciado correctamente.");
       }).catch(err => {
         resultContainer.innerText = "No se pudo acceder a la cámara. Revisa permisos.";
         console.error("Error al iniciar cámara:", err);
