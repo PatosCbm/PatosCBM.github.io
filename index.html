@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Escáner QR Móvil</title>
+  <title>Quinta Ticket</title>
   <style>
     * {
       box-sizing: border-box;
@@ -37,12 +37,12 @@
       letter-spacing: 1px;
     }
 
-    #qr-reader {
-      width: 100%;
-      max-width: 400px;
-      aspect-ratio: 1 / 1;
-      margin-top: 1rem;
-    }
+#qr-reader {
+  width: 100%;
+  max-width: 400px;
+  aspect-ratio: 1 / 1;
+  margin-top: 1rem;
+}
 
     #qr-reader-results {
       margin-top: 1rem;
@@ -57,9 +57,9 @@
 <body>
   <div id="banner">QUINTA TICKET</div>
 
-  <h2 style="margin: 0.5rem 0;">Escanea tu código QR</h2>
+
   <div id="qr-reader"></div>
-  <div id="qr-reader-results">Esperando escaneo...</div>
+  <div id="qr-reader-results"><div>
 
   <script src="/html5.js"></script>
   <script>
@@ -76,10 +76,10 @@
       }
 
       const html5QrCode = new Html5Qrcode("qr-reader");
-      const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+      const config = { fps: 10, qrbox: 250};
 
       html5QrCode.start(
-        { facingMode: { exact: "environment" } },
+        { facingMode: { ideal: "environment" } },
         config,
         onScanSuccess,
         (errorMessage) => {
