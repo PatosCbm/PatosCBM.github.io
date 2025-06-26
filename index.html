@@ -34,6 +34,13 @@
       z-index: 999;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
       letter-spacing: 1px;
+      gap: 10px;
+    }
+
+    #banner img {
+      height: 32px; /* tamaño del logo */
+      width: auto;
+      display: inline-block;
     }
 
     #qr-reader {
@@ -88,7 +95,10 @@
   </style>
 </head>
 <body>
-  <div id="banner">QUINTA TICKET</div>
+  <div id="banner">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAvklEQVRYR+2XwQ2AIAhF/z+ptqmwIGh9YaAwZY0qaEYcQcQG6u6fY3t2a6SkYY4BQAoC7BS7kATvsuwGwQkEsPCvC4XAGfARLOJCaHAdYLZCQxhqZlAvhL8bLNYAOziAGsGdhcI3CYIjGZBiCJ4mQiV6SpIg1/QQNs0w6dUjHfA2Ds0SxBY/iDwlxEhffY7LAAvQGPNrz1DlZ2Shxpmk3UM2vH2QZ8C8MYoLhNkzKAAAAABJRU5ErkJggg==" alt="Quinta Logo" />
+    QUINTA TICKET
+  </div>
   <div id="qr-reader"></div>
 
   <!-- Modal -->
@@ -147,14 +157,14 @@
       });
 
       html5QrCode = new Html5Qrcode("qr-reader");
-     const config = {
-  fps: 10,
-  qrbox: function(viewfinderWidth, viewfinderHeight) {
-    const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-    const boxSize = Math.floor(minEdge * 0.5);
-    return { width: boxSize*1.4, height: boxSize };
-  }
-};
+      const config = {
+        fps: 10,
+        qrbox: function(viewfinderWidth, viewfinderHeight) {
+          const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+          const boxSize = Math.floor(minEdge * 0.5);
+          return { width: boxSize * 1.4, height: boxSize };
+        }
+      };
 
       html5QrCode.start(
         { facingMode: "environment" },
