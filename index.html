@@ -72,7 +72,7 @@
   </style>
 </head>
 <body>
-  <div id="banner">QUINTA TICKET</div>
+  <div id="banner">QUINTA TICKET2</div>
 
   <div id="qr-reader">
     <div id="qr-frame"></div>
@@ -80,7 +80,7 @@
 
   <div id="qr-reader-results">Esperando escaneo...</div>
 
-  <script src="/html5.js"></script>
+  <script src="html5.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       const resultContainer = document.getElementById('qr-reader-results');
@@ -99,6 +99,203 @@
 
       html5QrCode.start(
         { facingMode: { ideal: "environment" } }, // flexible y evita error
+        config,
+        onScanSuccess,
+        (errorMessage) => {
+          console.warn("No se detectó QR:", errorMessage);
+        }
+      ).catch(err => {
+        resultContainer.innerText = "No se pudo acceder a la cámara. Revisa permisos.";
+        console.error("Error al iniciar cámara:", err);
+      });
+    });
+  </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quinta Ticket</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f9f9f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 60px;
+    }
+
+    #banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 50px;
+      background: rgba(33, 33, 33, 0.95);
+      color: #ffffff;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      z-index: 999;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      letter-spacing: 1px;
+    }
+
+    #qr-reader {
+      width: 100%;
+      max-width: 400px;
+      aspect-ratio: 1 / 1;
+      position: relative;
+      margin-top: 1rem;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    #qr-frame {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 250px;
+      height: 250px;
+      transform: translate(-50%, -50%);
+      border: 2px solid #00c853;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 200, 83, 0.4);
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    #qr-reader-results {
+      margin-top: 1rem;
+      font-size: 1.1rem;
+      color: #333;
+      text-align: center;
+      word-break: break-word;
+      max-width: 90%;
+    }
+
+    /* 🔳 Modal estilo */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      max-width: 300px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-content p {
+      margin-bottom: 1.5rem;
+      font-size: 1.2rem;
+    }
+
+    .modal-content button {
+      padding: 0.5rem 1.5rem;
+      background-color: #00c853;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .modal-content button:hover {
+      background-color: #00b34d;
+    }
+  </style>
+</head>
+<body>
+  <div id="banner">QUINTA TICKET</div>
+
+  <div id="qr-reader">
+    <div id="qr-frame"></div>
+  </div>
+
+  <div id="qr-reader-results">Esperando escaneo...</div>
+
+  <!-- Modal -->
+  <div id="result-modal" class="modal">
+    <div class="modal-content">
+      <p id="modal-message">Resultado</p>
+      <button id="modal-close-btn">Aceptar</button>
+    </div>
+  </div>
+
+  <script src="html5.js"></script>
+  <script>
+    let html5QrCode;
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const resultContainer = document.getElementById('qr-reader-results');
+      const modal = document.getElementById('result-modal');
+      const modalMessage = document.getElementById('modal-message');
+      const modalCloseBtn = document.getElementById('modal-close-btn');
+
+      let lastResult = null;
+
+      function showModal(message) {
+        modalMessage.textContent = message;
+        modal.style.display = 'flex';
+      }
+
+      function hideModal() {
+        modal.style.display = 'none';
+      }
+
+      function onScanSuccess(decodedText, decodedResult) {
+        if (decodedText !== lastResult) {
+          lastResult = decodedText;
+          resultContainer.innerText = `Resultado: ${decodedText}`;
+          console.log("QR detectado:", decodedText, decodedResult);
+
+          // Pausar escaneo
+          html5QrCode.pause();
+
+          // Mostrar mensaje personalizado según valor
+          if (decodedText === "A") {
+            showModal("Código A detectado 🎉");
+          } else if (decodedText === "B") {
+            showModal("Código B detectado ✅");
+          } else {
+            showModal(`Código: ${decodedText}`);
+          }
+        }
+      }
+
+      modalCloseBtn.addEventListener('click', () => {
+        hideModal();
+        html5QrCode.resume(); // Reanudar escaneo
+        lastResult = null;    // Permitir detectar nuevamente el mismo código
+      });
+
+      html5QrCode = new Html5Qrcode("qr-reader");
+      const config = { fps: 10, qrbox: 250 };
+
+      html5QrCode.start(
+        { facingMode: { exact: "environment" } },
         config,
         onScanSuccess,
         (errorMessage) => {
