@@ -8,10 +8,7 @@
 <script src="/html5.js"></script>
 <script>
     function docReady(fn) {
-        // see if DOM is already available
-        if (document.readyState === "complete"
-            || document.readyState === "interactive") {
-            // call on next available tick
+        if (document.readyState === "complete" || document.readyState === "interactive") {
             setTimeout(fn, 1);
         } else {
             document.addEventListener("DOMContentLoaded", fn);
@@ -21,23 +18,27 @@
     docReady(function () {
         var resultContainer = document.getElementById('qr-reader-results');
         var lastResult, countResults = 0;
+
         function onScanSuccess(decodedText, decodedResult) {
             if (decodedText !== lastResult) {
                 ++countResults;
                 lastResult = decodedText;
-                // Handle on success condition with the decoded message.
+                resultContainer.innerText = `Scan result: ${decodedText}`;
                 console.log(`Scan result ${decodedText}`, decodedResult);
             }
         }
 
-        var html5QrcodeScanner = new Html5QrcodeScanner(
-            "qr-reader", { fps: 10, qrbox: 250 },
-              rememberLastUsedCamera: true,
-  // Only support camera scan type.
-  supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
+        const html5QrCode = new Html5Qrcode("qr-reader");
+        const config = { fps: 10, qrbox: 250 };
 
-            );
-        html5QrcodeScanner.render(onScanSuccess);
+        html5QrCode.start(
+            { facingMode: { exact: "environment" } }, // Forzar cámara trasera
+            config,
+            onScanSuccess,
+            (errorMessage) => {
+                console.warn("QR error", errorMessage);
+            }
+        );
     });
 </script>
 </head>
